@@ -1,6 +1,5 @@
 
 import { connectMongoDB } from "./config/mongoDB.config.js"
-import User from "./models/User.model.js"
 import userRepository from "./repository/user.repository.js"
 import express from 'express'
 import testRouter from "./routes/test.router.js"
