@@ -7,7 +7,6 @@ import authRouter from "./routes/auth.router.js"
 import ENVIRONMENT from "./config/environment.config.js"
 import mail_transporter from "./config/mail.config.js"
 import randomMiddlewares from "./middlewares/random.middlewares.js"
-import User from "./models/User.model.js"
 import cors from 'cors'
 
 connectMongoDB()
