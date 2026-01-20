@@ -1,4 +1,5 @@
-import User from "../models/User.model"
+import User from "../models/User.model.js"
+
 
 class UserRepository {
     async crear (email, password, username) {
