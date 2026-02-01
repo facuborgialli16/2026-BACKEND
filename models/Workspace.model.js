@@ -1,36 +1,34 @@
 import mongoose from "mongoose";
 
-const WorkspaceSchema = new mongoose.Schema(
+
+/* Terminar de crear el modelo */
+const workspaceSchema = new mongoose.Schema(
     {
         fk_id_owner: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User' ,
-            require: true
-        },
-        title:{
-            type: String, 
+            ref: 'User', //Aca marcamos la "relacion"
             required: true
         },
-        description:{
-            type: Text, 
-            required: false
+        title: {
+            type: String,
+            required: true
         },
-        image:{
-            type: Text, 
-            required: false
+        image: {
+            type: String
         },
-        create_at:{
-            type: Date, 
+        description: {
+            type: String
+        },
+        created_at: {
+            type: Date,
             default: Date.now
         },
-        active:{
-            type: Boolean, 
+        active: {
+            type: Boolean,
             default: true
-        },
-
+        }
     }
 )
 
-const Workspace  = mongoose.model('Workspace',WorkspaceSchema)
-
+const Workspace = mongoose.model('Workspace', workspaceSchema)
 export default Workspace

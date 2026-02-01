@@ -18,7 +18,7 @@ const WorkspaceMemberSchema = new mongoose.Schema(
         },
         role:{
             type: String,
-            enum:['owner','admin','user']
+            enum:['Owner','admin','user']
         }
 
     }
