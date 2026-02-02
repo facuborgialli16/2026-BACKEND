@@ -154,8 +154,6 @@ class WorkspaceController {
     }
 
     async acceptInvitation (request, response){
-
-        
         try{
             const {invitation_token} = request.query
 
