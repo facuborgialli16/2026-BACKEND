@@ -16,7 +16,7 @@ class ChannelController {
                 }
             )
         }
-         catch (error) {
+        catch (error) {
             console.log("Error en addMember", error)
             /* Si tiene status decimos que es un error controlado (osea es esperable) */
             if (error.status) {
@@ -56,7 +56,7 @@ class ChannelController {
                 }
             )
         }
-         catch (error) {
+        catch (error) {
             console.log("Error en addMember", error)
             /* Si tiene status decimos que es un error controlado (osea es esperable) */
             if (error.status) {

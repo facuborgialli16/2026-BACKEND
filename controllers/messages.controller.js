@@ -40,7 +40,7 @@ class MessagesController {
         try{
 
         }
-         catch (error) {
+        catch (error) {
             console.log("Error en crear mensaje", error)
             if (error.status) {
                 return response.json({
