@@ -13,6 +13,13 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
+app.get('/', (request, response) => {
+    response.json({
+        ok: true,
+        message: 'Servidor funcionando correctamente',
+        data: null
+    })
+})
 // ✅ RUTAS PUBLICAS (SIN API KEY)
 app.use("/api/auth", authRouter)
 app.use("/api/invitations", invitationRouter)
@@ -23,13 +30,7 @@ app.use(verifyApiKeyMiddleware)
 // 🔒 RUTAS PRIVADAS
 app.use("/api/workspace", workspaceRouter)
 
-app.get('/', (request, response) => {
-    response.json({
-        ok: true,
-        message: 'Servidor funcionando correctamente',
-        data: null
-    })
-})
+
 
 // ⚠️ SIEMPRE AL FINAL
 app.use(errorHandlerMiddleware)
