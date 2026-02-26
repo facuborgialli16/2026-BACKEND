@@ -5,7 +5,7 @@ const authRouter = express.Router()
 
 
 authRouter.post(
-    '/register', 
+    '/register',
     authController.register
 )
 
@@ -18,4 +18,15 @@ authRouter.get(
     '/verify-email',
     authController.verifyEmail
 )
+
+authRouter.post(
+    '/forgot-password',
+    authController.forgotPassword
+)
+
+authRouter.put(
+    '/reset-password',
+    authController.resetPassword
+)
+
 export default authRouter

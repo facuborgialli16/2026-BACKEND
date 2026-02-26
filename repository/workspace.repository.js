@@ -3,63 +3,84 @@ import Workspace from "../models/Workspace.model.js";
 
 class WorkspaceRepository {
 
-    async getById (workspace_id){
-        return await Workspace.findById(workspace_id)
+    // Obtener workspace por id
+    async getById(workspace_id) {
+        return await Workspace.findById(workspace_id);
     }
-    async getWorkspacesByUserId(user_id){
-        //Busco a todos los miembros que pertenezcan al usuario
-        //Esto seria buscar todas mis membresias
-        const workspaces = await MemberWorkspace.find({fk_id_user: user_id})
-        .populate({
-            path: 'fk_id_workspace',
-            match: {active: true}
-        }) //Esto permite expandir sobre la referencia a la tabla de espacios de trabajo
 
+    // Obtener todos los workspaces de un usuario
+    async getWorkspacesByUserId(user_id) {
+        const memberships = await MemberWorkspace.find({ fk_id_user: user_id })
+            .populate({
+                path: 'fk_id_workspace',
+                match: { active: true } // Solo workspaces activos
+            });
 
-        const members_workspace = workspaces.filter((member) => member.fk_id_workspace !== null) 
-        return members_workspace.map(
-            (member_workspace) => {
-                return {
-                    member_id: member_workspace._id,
-                    member_role: member_workspace.role,
-                    member_id_user: member_workspace.fk_id_user,
-                    workspace_image: member_workspace.fk_id_workspace.image,
-                    workspace_title: member_workspace.fk_id_workspace.title,
-                    workspace_id: member_workspace.fk_id_workspace._id
-                    
-                }
-            }
-        )
+        return memberships
+            .filter(m => m.fk_id_workspace !== null)
+            .map(m => m.fk_id_workspace); // Devolver solo el workspace
     }
-    async create (fk_id_owner, title, image, description){
+
+    // Crear un workspace nuevo
+    async create(fk_id_owner, title, image, description) {
         const workspace = await Workspace.create({
             fk_id_owner,
             title,
             image,
-            description
-        })
-        return workspace
+            description,
+            active: true
+        });
+        return workspace;
     }
 
-    async addMember (workspace_id, user_id, role){
+    // Agregar un miembro a un workspace
+    async addMember(workspace_id, user_id, role) {
+        // Evitar duplicados
+        const existing = await MemberWorkspace.findOne({ fk_id_workspace: workspace_id, fk_id_user: user_id });
+        if (existing) return existing;
+
         const member = await MemberWorkspace.create({
             fk_id_workspace: workspace_id,
             fk_id_user: user_id,
             role
-        })
-        return member
+        });
+        return member;
     }
 
-    //Obtener miembro de un espacio de trabajo por id de espacio de trabajo y id de usuario
-    async getMemberByWorkspaceIdAndUserId(workspace_id, user_id){
-        const member = await MemberWorkspace.findOne({fk_id_workspace: workspace_id, fk_id_user: user_id})
-        return member
+    // Obtener un miembro por workspace_id y user_id
+    async getMemberByWorkspaceIdAndUserId(workspace_id, user_id) {
+        return await MemberWorkspace.findOne({ fk_id_workspace: workspace_id, fk_id_user: user_id });
     }
 
-    async delete(workspace_id){
-        await Workspace.findByIdAndUpdate(workspace_id, {active: false})
+    // Eliminar (desactivar) workspace
+    async delete(workspace_id) {
+        await Workspace.findByIdAndUpdate(workspace_id, { active: false });
     }
+
+    // Obtener todos los miembros de un workspace
+    async getMembersByWorkspaceId(workspace_id) {
+        return await MemberWorkspace.find({ fk_id_workspace: workspace_id })
+            .populate('fk_id_user', 'username email');
+    }
+
+    // Actualizar rol de un miembro
+    async updateMember(member_id, role) {
+        const member = await MemberWorkspace.findByIdAndUpdate(member_id, { role }, { new: true });
+        return member;
+    }
+
+    // Eliminar un miembro del workspace
+    async removeMember(member_id) {
+        return await MemberWorkspace.findByIdAndDelete(member_id);
+    }
+
+    // Actualizar workspace
+    async update(workspace_id, fields) {
+        const workspace = await Workspace.findByIdAndUpdate(workspace_id, fields, { new: true });
+        return workspace;
+    }
+
 }
 
-const workspaceRepository = new WorkspaceRepository()
-export default workspaceRepository
+const workspaceRepository = new WorkspaceRepository();
+export default workspaceRepository;

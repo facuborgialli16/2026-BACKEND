@@ -2,28 +2,28 @@ import mongoose from "mongoose";
 
 const WorkspaceMemberSchema = new mongoose.Schema(
     {
-        fk_id_user:{
+        fk_id_user: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User' ,
+            ref: 'User',
             require: true
         },
-        fk_id_workspace:{
-            type: mongoose.Schema.Types.ObjectId ,
-            ref: 'Workspace' ,
+        fk_id_workspace: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Workspace',
             require: true
         },
         create_at: {
-            type: Date, 
+            type: Date,
             default: Date.now
         },
-        role:{
+        role: {
             type: String,
-            enum:['Owner','Admin','User']
+            enum: ['Owner', 'Admin', 'Member']
         }
 
     }
 )
 
-const MemberWorkspace = mongoose.model('MemberWorkspace',WorkspaceMemberSchema)
+const MemberWorkspace = mongoose.model('MemberWorkspace', WorkspaceMemberSchema)
 
 export default MemberWorkspace
