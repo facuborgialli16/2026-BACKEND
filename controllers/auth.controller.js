@@ -27,23 +27,21 @@ class AuthController {
             ENVIRONMENT.JWT_SECRET_KEY
         )
 
-        mail_transporter.sendMail(
-            {
+            await mail_transporter.sendMail({
                 from: ENVIRONMENT.GMAIL_USERNAME,
                 to: email,
                 subject: 'Verifica tu email',
                 html: `
                 <h1>Bienvenido ${username}</h1>
                 <p>Necesitamos que verifiques tu mail</p>
-                <p>Haz click en "Verificar" para verificar este mail</p>
-                <a 
-                href='http://localhost:8080/api/auth/verify-email?verification_email_token=${verification_email_token}'
-                >Verificar</a>
+                <p>Haz click en "Verificar"</p>
+                <a href='${ENVIRONMENT.URL_BACKEND}/api/auth/verify-email?verification_email_token=${verification_email_token}'>
+                Verificar
+                </a>
                 <br>
                 <span>Si desconoces este registro desestima este mail</span>
                 `
-            }
-        )
+        })
 
         return response.json({
             message: 'Usuario creado exitosamente',
