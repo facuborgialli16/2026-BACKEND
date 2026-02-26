@@ -1,143 +1,129 @@
 # Slack Clone Backend
 
-Este proyecto es el backend para un clon de Slack, construido con Node.js y Express. Proporciona una API para gestionar autenticación de usuarios, espacios de trabajo, canales y mensajería.
+Este proyecto es el backend para un clon de Slack, construido con Node.js y Express. Proporciona una API robusta para gestionar autenticación de usuarios, espacios de trabajo (workspaces), canales y mensajería en tiempo real.
 
-## Características
+## 🚀 Características
 
--   **Autenticación**: Registro, inicio de sesión y verificación de correo electrónico.
--   **Workspaces**: Creación, gestión y listado de espacios de trabajo. Gestión de miembros e invitaciones.
--   **Canales**: Gestión de canales dentro de un workspace.
--   **Mensajería**: Envío y recepción de mensajes en canales.
--   **Base de datos**: Persistencia de datos utilizando MongoDB y Mongoose.
+-   **Autenticación**: Registro, inicio de sesión (JWT), recuperación de contraseña y verificación de correo electrónico vía Nodemailer.
+-   **Workspaces**: Creación, edición, eliminación y listado de espacios de trabajo.
+-   **Gestión de Miembros**: Invitaciones por correo, roles (Owner, Admin, Member) y gestión de permisos.
+-   **Canales**: Creación, actualización y eliminación de canales dentro de cada workspace.
+-   **Mensajería**: Sistema de mensajes con persistencia en MongoDB.
+-   **Seguridad**: Middleware de API Key y validación de tokens JWT.
 
-## Requisitos
+## 🛠️ Requisitos
 
--   Node.js (v14 o superior recomendado)
--   MongoDB (Instancia local o cluster en la nube como MongoDB Atlas)
+-   **Node.js**: v18 o superior.
+-   **MongoDB**: Instancia local o cluster en MongoDB Atlas.
+-   **Cuenta de Gmail**: Para el envío de correos (requiere "Contraseña de aplicación").
 
-## Instalación
+## 📥 Instalación
 
 1.  **Clonar el repositorio:**
-
     ```bash
     git clone <URL_DEL_REPOSITORIO>
-    cd <NOMBRE_DEL_DIRECTORIO>
+    cd backend
     ```
 
 2.  **Instalar dependencias:**
-
     ```bash
     npm install
     ```
 
 3.  **Configurar variables de entorno:**
-
-    Crea un archivo `.env` en la raíz del proyecto y define las siguientes variables:
-
+    Crea un archivo `.env` en la raíz del proyecto (puedes usar el archivo `.env.example` como referencia si existe):
     ```env
-    MONGO_DB_URI=tu_uri_de_mongodb
-    MONGO_DB_NAME=nombre_de_tu_base_de_datos
-    JWT_SECRET_KEY=clave_secreta_para_jwt
-    GMAIL_USERNAME=tu_email_para_nodemailer
+    MONGO_DB_URI=mongodb+srv://...
+    MONGO_DB_NAME=UTN-SLACK
+    JWT_SECRET_KEY=tu_clave_secreta_super_segura
+    GMAIL_USERNAME=tu_email@gmail.com
     GMAIL_PASSWORD=tu_password_de_aplicacion
-    URL_FRONTEND=url_de_tu_frontend
+    URL_FRONTEND=http://localhost:5173
     URL_BACKEND=http://localhost:8080
+    API_KEY=tu_uuid_api_key
     ```
 
-## Ejecución
+## 🏃 Ejecución
 
--   **Modo desarrollo (con "watch" para recarga automática):**
-
+-   **Modo desarrollo (con auto-reload):**
     ```bash
     npm run dev
     ```
 
 -   **Modo producción:**
-
     ```bash
     npm start
     ```
+    El servidor corre por defecto en `http://localhost:8080`.
 
-El servidor se iniciará por defecto en el puerto `8080`.
+## 📖 Documentación de la API
 
-## Ejemplos de Requests (API)
+### Headers Requeridos
 
-A continuación se detallan algunos de los endpoints principales.
+| Header | Valor | Requerido en |
+| :--- | :--- | :--- |
+| `Content-Type` | `application/json` | Todas las peticiones POST/PUT |
+| `x-api-key` | Su `API_KEY` del `.env` | Rutas de Workspace, Canales, Mensajes |
+| `Authorization` | `Bearer <TOKEN_JWT>` | Todas las rutas privadas |
 
-### Autenticación
+---
 
-**Registro de Usuario**
-`POST /api/auth/register`
+### 🔐 Autenticación (`/api/auth`)
 
-```json
-{
-  "name": "Juan Perez",
-  "email": "juan@example.com",
-  "password": "password123"
-}
-```
+| Método | Endpoint | Descripción |
+| :--- | :--- | :--- |
+| POST | `/register` | Registra un nuevo usuario. |
+| POST | `/login` | Inicia sesión y devuelve un token JWT. |
+| GET | `/verify-email?token=...` | Verifica la cuenta del usuario. |
+| POST | `/forgot-password` | Envía correo para recuperar contraseña. |
+| PUT | `/reset-password` | Cambia la contraseña usando el token recibido. |
 
-**Login**
-`POST /api/auth/login`
+### 🏢 Workspaces (`/api/workspace`)
 
-```json
-{
-  "email": "juan@example.com",
-  "password": "password123"
-}
-```
+*Requieren `x-api-key` y `Authorization`.*
 
-### Workspaces (Requiere Header `Authorization`)
+| Método | Endpoint | Descripción |
+| :--- | :--- | :--- |
+| GET | `/` | Obtiene todos los workspaces del usuario. |
+| POST | `/` | Crea un nuevo workspace. |
+| GET | `/:workspace_id` | Obtiene detalles de un workspace específico. |
+| PUT | `/:workspace_id` | Actualiza un workspace (Admin/Owner). |
+| DELETE | `/:workspace_id` | Elimina un workspace. |
 
-_Nota: Para todas las rutas protegidas, incluir el header:_
-`Authorization: Bearer <TOKEN_JWT>`
+### 👥 Miembros e Invitaciones
 
-**Crear Workspace**
-`POST /api/workspace`
+| Método | Endpoint | Descripción |
+| :--- | :--- | :--- |
+| GET | `/api/workspace/:id/members` | Lista miembros del workspace. |
+| POST | `/api/workspace/:id/members` | Envía invitación a un nuevo miembro. |
+| GET | `/api/invitations/accept?token=...` | Acepta una invitación (Público). |
+| PUT | `/api/workspace/:id/members/:m_id` | Actualiza rol de un miembro. |
+| DELETE | `/api/workspace/:id/members/:m_id` | Elimina un miembro del workspace. |
 
-```json
-{
-  "name": "Mi Equipo",
-  "image": "https://url-imagen.com/logo.png" // Opcional
-}
-```
+### 💬 Canales (`/api/workspace/:id/channels`)
 
-**Obtener mis Workspaces**
-`GET /api/workspace`
+| Método | Endpoint | Descripción |
+| :--- | :--- | :--- |
+| GET | `/` | Lista canales del workspace. |
+| POST | `/` | Crea un canal (Admin/Owner). |
+| PUT | `/:channel_id` | Edita un canal. |
+| DELETE | `/:channel_id` | Elimina un canal. |
 
-**Invitar Miembro**
-`POST /api/workspace/:workspace_id/members`
+### ✉️ Mensajes (`/api/workspace/:id/channels/:c_id/messages`)
 
-```json
-{
-  "email": "nuevo_miembro@example.com"
-}
-```
+| Método | Endpoint | Descripción |
+| :--- | :--- | :--- |
+| GET | `/` | Obtiene historial de mensajes del canal. |
+| POST | `/` | Envía un mensaje al canal. |
+| DELETE | `/:message_id` | Elimina un mensaje específico. |
 
-### Canales
+---
 
-**Crear Canal**
-`POST /api/workspace/:workspace_id/channels`
+## 🛠️ Tecnologías Utilizadas
 
-```json
-{
-  "name": "general"
-}
-```
-
-**Obtener Canales de un Workspace**
-`GET /api/workspace/:workspace_id/channels`
-
-### Mensajes
-
-**Enviar Mensaje a un Canal**
-`POST /api/workspace/:workspace_id/channels/:channel_id/messages`
-
-```json
-{
-  "content": "Hola mundo!"
-}
-```
-
-**Obtener Mensajes de un Canal**
-`GET /api/workspace/:workspace_id/channels/:channel_id/messages`
+- **Express.js**: Framework web.
+- **Mongoose**: Modelado de objetos para MongoDB.
+- **Bcrypt**: Encriptación de contraseñas.
+- **JSONWebToken**: Autenticación basada en tokens.
+- **Nodemailer**: Envío de correos electrónicos.
+- **CORS**: Intercambio de recursos de origen cruzado.
